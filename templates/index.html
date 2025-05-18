@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Pagar con Khipu</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+    <script src="https://js.khipu.com/v1/kws.js"></script>
+    <script defer src="{{ url_for('static', filename='pago.js') }}"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Pago con Khipu</h1>
+      <form id="pagoForm">
+        <input type="number" id="monto" placeholder="Monto CLP" required />
+        <input
+          type="text"
+          id="subject"
+          placeholder="Motivo del pago"
+          required
+        />
+        <input type="email" id="correo" placeholder="Correo del pagador" />
+        <button type="submit" id="pagarBtn">Pagar ahora</button>
+      </form>
+      <div id="khipu-web-root"></div>
+    </div>
+  </body>
+</html>

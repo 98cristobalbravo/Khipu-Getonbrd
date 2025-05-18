@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Estado del Pago</title>
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='styles.css') }}"
+    />
+    <script src="https://js.khipu.com/v1/kws.js"></script>
+  </head>
+  <body>
+    <div class="container">
+      <h1>Procesando tu pago</h1>
+
+      <div class="status-box">
+        <div id="status-container" class="status-message">
+          <span id="loading-spinner">⟳</span>
+          <span id="estado">Verificando estado del pago...</span>
+        </div>
+        <div id="celebration" class="success" style="display: none">
+          ¡Pago exitoso!
+        </div>
+        <p>ID del pago: {{ payment_id if payment_id else 'No disponible' }}</p>
+        <p id="redirect-message" class="redirect-info" style="display: none">
+          Serás redirigido a la página de confirmación en
+          <span id="countdown">60</span> segundos...
+        </p>
+
+        <div id="home-link" style="display: none">
+          <a href="/" class="btn">Volver a la página principal</a>
+        </div>
+      </div>
+
+      <div id="khipu-web-root"></div>
+    </div>
+
+    <script>
+      let checkInterval;
+      let paymentCompleted = false;
+      const paymentId = "{{ payment_id }}";
+
+      document.addEventListener("DOMContentLoaded", function () {
+        if (!paymentId || paymentId === "None") {
+          handleMissingPaymentId();
+          return;
+        }
+
+        initKhipuModal(paymentId);
+        verificarEstado();
+        checkInterval = setInterval(verificarEstado, 5000);
+      });
+
+      function handleMissingPaymentId() {
+        document.getElementById("loading-spinner").style.display = "none";
+        document.getElementById("estado").textContent =
+          "No se pudo verificar el estado del pago. Falta el ID de pago.";
+        document.getElementById("estado").className = "error";
+        document.getElementById("home-link").style.display = "block";
+      }
+
+      function initKhipuModal(paymentId) {
+        const options = {
+          mountElement: document.getElementById("khipu-web-root"),
+          modal: true,
+          modalOptions: {
+            maxWidth: 450,
+            maxHeight: 860,
+          },
+          options: {
+            skipExitPage: false,
+          },
+        };
+
+        const callback = (result) => {
+          console.log("Resultado:", result);
+          if (result.result === "OK") {
+            // Ocultar el mensaje de verificación
+            document.getElementById("status-container").style.display = "none";
+
+            // Mostrar el mensaje de éxito
+            document.getElementById("celebration").style.display = "block";
+            document.getElementById("redirect-message").style.display = "block";
+
+            // Iniciar la cuenta regresiva
+            startCountdown(60);
+          } else if (result.result === "ERROR") {
+            document.getElementById("estado").textContent =
+              "Error en el pago: " + result.exitMessage;
+            document.getElementById("estado").className = "error";
+            clearInterval(checkInterval);
+            document.getElementById("loading-spinner").style.display = "none";
+            document.getElementById("home-link").style.display = "block";
+          } else if (result.result === "WARNING") {
+            document.getElementById("estado").textContent =
+              "Advertencia: " + result.exitMessage;
+            document.getElementById("estado").className = "error";
+          } else if (result.result === "CONTINUE") {
+            window.location.href = result.continueUrl;
+          }
+        };
+
+        const khipu = new Khipu();
+        khipu.startOperation(paymentId, callback, options);
+      }
+
+      function verificarEstado() {
+        if (paymentCompleted || !paymentId || paymentId === "None") return;
+
+        fetch(`/verificar_pago?payment_id=${paymentId}`)
+          .then((response) => response.json())
+          .then((data) => {
+            console.log("Estado actual:", data.status);
+
+            let statusMessage = "";
+            let statusClass = "";
+            let isCompleted = false;
+
+            switch (data.status) {
+              case "pending":
+                statusMessage = "Pendiente de pago...";
+                statusClass = "info";
+                break;
+              case "verifying":
+                statusMessage = "Verificando pago...";
+                statusClass = "info";
+                break;
+              case "done":
+                // Ocultar el mensaje de verificación
+                document.getElementById("status-container").style.display =
+                  "none";
+
+                // Mostrar el mensaje de éxito
+                document.getElementById("celebration").style.display = "block";
+                isCompleted = true;
+                break;
+              case "cancelled":
+                statusMessage = "Pago cancelado";
+                statusClass = "error";
+                isCompleted = true;
+                break;
+              case "error":
+                statusMessage = "Error en el pago";
+                statusClass = "error";
+                isCompleted = true;
+                break;
+              default:
+                statusMessage = "Estado: " + data.status;
+                statusClass = "info";
+            }
+
+            // Solo actualizar el mensaje si no está completado o si no es exitoso
+            if (!isCompleted) {
+              document.getElementById("estado").textContent = statusMessage;
+              document.getElementById("estado").className = statusClass;
+            }
+
+            if (isCompleted) {
+              paymentCompleted = true;
+              clearInterval(checkInterval);
+
+              if (data.status === "done") {
+                document.getElementById("redirect-message").style.display =
+                  "block";
+                document.getElementById("home-link").style.display = "none";
+
+                // Iniciar la cuenta regresiva
+                startCountdown(60);
+              } else {
+                document.getElementById("home-link").style.display = "block";
+              }
+            }
+          })
+          .catch((error) => {
+            console.error("Error al verificar estado:", error);
+            document.getElementById("estado").textContent =
+              "Error al verificar el estado del pago";
+            document.getElementById("estado").className = "error";
+            document.getElementById("loading-spinner").style.display = "none";
+            document.getElementById("home-link").style.display = "block";
+          });
+      }
+
+      function startCountdown(seconds) {
+        const countdownElement = document.getElementById("countdown");
+        let remainingSeconds = seconds;
+
+        countdownElement.textContent = remainingSeconds;
+
+        const countdownInterval = setInterval(() => {
+          remainingSeconds--;
+          countdownElement.textContent = remainingSeconds;
+
+          if (remainingSeconds <= 0) {
+            clearInterval(countdownInterval);
+            window.location.href = "/exito";
+          }
+        }, 1000);
+      }
+    </script>
+  </body>
+</html>

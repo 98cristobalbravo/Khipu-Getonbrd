@@ -1,0 +1,132 @@
+/* Estilos generales */
+body {
+  font-family: Arial, sans-serif;
+  line-height: 1.6;
+  color: #333;
+  margin: 0;
+  padding: 20px;
+  background-color: #f8f8f8;
+}
+
+h1 {
+  color: #444;
+  margin-bottom: 20px;
+}
+
+/* Contenedores */
+.container {
+  width: 100%;
+  max-width: 800px;
+  margin-left: 0;
+  padding: 15px;
+}
+
+/* Formularios */
+form {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 500px;
+}
+
+input,
+button {
+  display: block;
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 16px;
+}
+
+button {
+  background-color: #8347ad;
+  color: white;
+  border: none;
+  cursor: pointer;
+  font-weight: bold;
+}
+
+button:hover {
+  background-color: #6a3a8c;
+}
+
+/* Estado del pago */
+.status-box {
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.status-message {
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+.success {
+  color: #2ecc71;
+}
+
+.error {
+  color: #e74c3c;
+}
+
+.info {
+  color: #3498db;
+}
+
+.redirect-info {
+  font-style: italic;
+  color: #7f8c8d;
+  margin-top: 10px;
+}
+
+/* Enlaces */
+a {
+  color: #8347ad;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.btn {
+  display: inline-block;
+  background-color: #8347ad;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+.btn:hover {
+  background-color: #6a3a8c;
+  text-decoration: none;
+}
+
+/* Página de éxito */
+.success-box {
+  background-color: #fff;
+  padding: 30px;
+  border-radius: 5px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  width: 100%;
+  max-width: 500px;
+}
+
+.success-icon {
+  font-size: 48px;
+  color: #2ecc71;
+  margin-bottom: 20px;
+}
